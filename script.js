@@ -11,7 +11,12 @@ window.onload = async function init() {
     inputSum.addEventListener('change', updateValueSum);
     totalSum = document.getElementById('totalSum');
     date = document.getElementById('newDate');
-    date.addEventListener('change', updateDate)
+    date.addEventListener('change', updateDate);
+    const resp = await fetch('http://localhost:7000/allTasks', {
+        method: 'GET'
+    });
+    let result = await resp.json();
+    allCases = result;
     render()
 } //loading by open page
 
@@ -39,7 +44,7 @@ btnAdd = (text, sum) => {
     }
 } //adding by enter function
 
-addFunc = () => {
+addFunc = async () => {
     if(inputText.value === '' || date.value === '' || inputSum.value === '') {
         alert('Enter your case !');
     } else {
@@ -47,6 +52,19 @@ addFunc = () => {
             {text: valueText,
             date: valueDate,
             sum: valueSum});
+        const resp = await fetch('http://localhost:7000/createTask', {
+            method: 'POST',
+            headers: {
+                'Content-type': 'application/json;charset=utf-8',
+                'Access-Control-Allow-Origin': '*'
+            },
+            body: JSON.stringify( {
+                text: valueText,
+                date: valueDate,
+                sum: valueSum
+            })
+        });
+        let result = await resp.json();
         count = count + Number(valueSum);
         totalSum.innerText = `Total: ${count} rub.`;
         valueText = '';
@@ -59,7 +77,7 @@ addFunc = () => {
     }
 } //checking input-length, adding cases function item.text
 
-render = () => {
+render = async () => {
     const content = document.getElementById('content_page');
     while(content.firstChild) {
         content.removeChild(content.firstChild);
@@ -92,23 +110,34 @@ render = () => {
             imgContEdit.className = 'imgCont';
             container.appendChild(imgContEdit); //creating img container
 
-            const imgDone = document.createElement('img');
-            imgDone.src = 'img/done.png';
-            imgDone.className = 'editPng';
-            imgDone.onclick = () => {
+            const imgEdit = document.createElement('img');
+            imgEdit.src = 'img/done.png';
+            imgEdit.className = 'editPng';
+            editingFunc = async () => {
                 allCases[indexEdit].text = text.value;
                 allCases[indexEdit].date = date.value;
                 allCases[indexEdit].sum = sum.value;
                 if(allCases[indexEdit].text === '' || allCases[indexEdit].date === '' || allCases[indexEdit].sum === '') {
                     alert('Incorrect value. Add value please...');
                 } else {
+                    const resp = await fetch('http://localhost:7000/updateTask', {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-type': 'application/json;charset=utf-8',
+                        'Access-Control-Allow-Origin': '*'
+                    },
+                    body: JSON.stringify(allCases[indexEdit])
+                });
+                let result = await resp.json();
+                // allCases = result.data;
                 totalSum.innerText = `Total: ${count} rub.`;
                 indexEdit = -1;
                 render();
             }
             } //saving edit function
-            imgContEdit.appendChild(imgDone);
-
+            imgContEdit.appendChild(imgEdit);
+            imgEdit.addEventListener('click', editingFunc);
+            
             const imgCanc = document.createElement('img');
             imgCanc.src = 'img/cancel.webp';
             imgCanc.className = 'editPng';
@@ -124,8 +153,9 @@ render = () => {
             container.appendChild(text); //creating shop text
             // editDouble = (text) => {
             //     text.setAttribute("contenteditable", "true");
+            //     text.contenteditable = 'true';
             // }
-            // text.addEventListener('dbclick', editDouble);
+            // text.addEventListener('dblclick', editDouble);
 
             const dateText = document.createElement('p');
             dateText.className = 'dateDiv';
@@ -145,6 +175,7 @@ render = () => {
             imgEdit.src = 'img/dit.png';
             imgEdit.className = 'editPng';
             imgCont.appendChild(imgEdit); //creating edit img
+            // imgEdit.addEventListener('dblclick', editingFunc)
 
             const imgDel = document.createElement('img');
             imgDel.src = 'img/del.png';
@@ -158,13 +189,22 @@ render = () => {
             imgEdit.onclick = (text) => {
                 indexEdit = index;
                 render();
-            } //editing value in array !!создать новые значения переменные item.text, item.sum, item.date
+            } //editing value in array
+
+            text.ondblclick = (text, index) => {
+                allCases[indexEdit].text = text.value;
+                
+            }
         }
         content.appendChild(container);
     });
 } //rendering array
 
-delFunc = (item, index) => {
+delFunc = async (item, index) => {
+    const resp = await fetch(`http://localhost:7000/deleteTask?_id=${allCases[index]._id}`, {
+        method: 'DELETE'
+    });
+    let result = await resp.json();
     allCases.splice(index, 1);
     count = count - Number(item.sum);
     totalSum.innerText = `Total: ${count} rub.`;

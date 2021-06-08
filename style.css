@@ -1,13 +1,25 @@
 * {
     box-sizing: border-box;
     overflow: hidden;
-    /* font-family: mono; */
+    font-family: arial;
 }
 
 body {
-    background: url(img/background.jpg)
+    background: url(img/background.jpg);
 }
 
+p {
+    font-weight: 550;
+}
+
+.gradient {
+    color: rgb(49, 47, 47);
+    padding: 5px;
+    border-radius: 5px;
+    background-size: 400% 400%; 
+    background-image: linear-gradient(-45deg, rgb(193, 233, 211), #c8ffae, #fffd86, #9cf0c9);
+    animation: gradient 13s ease infinite;
+}
 .container {
     display: flex;
     flex-direction: column;
@@ -57,7 +69,19 @@ body {
     color: rgb(61, 53, 53);
     cursor: pointer;
     height: 30px;
-    /* min-width: 100px; */
+    font-weight: 900;
+}
+
+@keyframes gradient {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
 button, 
@@ -74,7 +98,6 @@ button:focus {
 .elems_wrapper {
     width: 100%;
     flex-wrap: wrap;
-    /* max-width: 400px; */
     justify-content: center;
     display: flex;
     max-height: 500px;
@@ -84,7 +107,6 @@ button:focus {
 .task_container {
     width: 95%;
     min-width: 200px;
-    /* max-width: 350px; */
     display: inline-flex;
     flex-wrap: wrap;
     align-items: center;

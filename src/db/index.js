@@ -4,7 +4,8 @@ const { Schema } = mongoose;
 
 const taskScheme = new Schema({
     text: String,
-    isCheck: Boolean
+    date: String,
+    sum: Number
   });
 
 module.exports = Task = mongoose.model('cases', taskScheme);

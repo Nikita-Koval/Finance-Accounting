@@ -2,18 +2,16 @@ const express = require('express');
 const router = express.Router();
 
 const {
-    getAllTasks,
-    addNewTask,
-    changeTask,
-    deleteTask,
-    deleteAll
+    getAllCases,
+    addNewCase,
+    changeCase,
+    deleteCase,
 } = require('../controllers/task.controller');
 
 //Routes for tasks operations
-router.get('/allTasks', getAllTasks);
-router.post('/createTask', addNewTask);
-router.patch('/updateTask', changeTask);
-router.delete('/deleteTask', deleteTask);
-router.delete('/deleteTasks', deleteAll);
+router.get('/allTasks', getAllCases);
+router.post('/createTask', addNewCase);
+router.patch('/updateTask', changeCase);
+router.delete('/deleteTask', deleteCase);
 
 module.exports = router;
