@@ -3,6 +3,7 @@ let valueText = '';
 let valueSum = ''
 let indexEdit = -1;
 let count = 0;
+let counter = [];
 
 window.onload = async function init() {
     inputText = document.getElementById('newText');
@@ -52,6 +53,13 @@ addFunc = async () => {
             {text: valueText,
             date: valueDate,
             sum: valueSum});
+        // counter.push(valueSum)
+        // let i = 0;
+
+        // while(i < counter.length) {
+        //     console.log(counter);
+        //     i++
+        // }
         const resp = await fetch('http://localhost:7000/createTask', {
             method: 'POST',
             headers: {
@@ -111,7 +119,7 @@ render = async () => {
             container.appendChild(imgContEdit); //creating img container
 
             const imgEdit = document.createElement('img');
-            imgEdit.src = 'img/done.png';
+            imgEdit.src = 'img/accept.ico';
             imgEdit.className = 'editPng';
             editingFunc = async () => {
                 allCases[indexEdit].text = text.value;
@@ -129,20 +137,20 @@ render = async () => {
                     body: JSON.stringify(allCases[indexEdit])
                 });
                 let result = await resp.json();
-                // allCases = result.data;
                 totalSum.innerText = `Total: ${count} rub.`;
                 indexEdit = -1;
                 render();
             }
             } //saving edit function
+
             imgContEdit.appendChild(imgEdit);
             imgEdit.addEventListener('click', editingFunc);
             
             const imgCanc = document.createElement('img');
-            imgCanc.src = 'img/cancel.webp';
+            imgCanc.src = 'img/canc.png';
             imgCanc.className = 'editPng';
             imgContEdit.appendChild(imgCanc);
-            imgCanc.onclick = function(text){
+            imgCanc.onclick = (text) => {
                 indexEdit = -1;
                 render();
             }
@@ -151,11 +159,6 @@ render = async () => {
             text.className = 'textBlock';
             text.innerText = `${index + 1}) Shop: ${item.text}`;
             container.appendChild(text); //creating shop text
-            // editDouble = (text) => {
-            //     text.setAttribute("contenteditable", "true");
-            //     text.contenteditable = 'true';
-            // }
-            // text.addEventListener('dblclick', editDouble);
 
             const dateText = document.createElement('p');
             dateText.className = 'dateDiv';
@@ -175,7 +178,6 @@ render = async () => {
             imgEdit.src = 'img/dit.png';
             imgEdit.className = 'editPng';
             imgCont.appendChild(imgEdit); //creating edit img
-            // imgEdit.addEventListener('dblclick', editingFunc)
 
             const imgDel = document.createElement('img');
             imgDel.src = 'img/del.png';
@@ -190,11 +192,6 @@ render = async () => {
                 indexEdit = index;
                 render();
             } //editing value in array
-
-            text.ondblclick = (text, index) => {
-                allCases[indexEdit].text = text.value;
-                
-            }
         }
         content.appendChild(container);
     });
