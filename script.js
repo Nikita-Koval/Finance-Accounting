@@ -1,9 +1,8 @@
 let allCases = [];
 let valueText = '';
-let valueSum = ''
+let valueSum = null;
 let indexEdit = -1;
 let count = 0;
-let counter = [];
 
 window.onload = async function init() {
     inputText = document.getElementById('newText');
@@ -11,6 +10,8 @@ window.onload = async function init() {
     inputSum = document.getElementById('newSum');
     inputSum.addEventListener('change', updateValueSum);
     totalSum = document.getElementById('totalSum');
+    totalSum.addEventListener('DOMContentLoaded', countFunc);
+
     date = document.getElementById('newDate');
     date.addEventListener('change', updateDate);
     const resp = await fetch('http://localhost:7000/allTasks', {
@@ -18,12 +19,13 @@ window.onload = async function init() {
     });
     let result = await resp.json();
     allCases = result;
+    totalSum.innerText = `Total: ${countFunc()} rub.`;
     render()
 } //loading by open page
 
 updateValue = (event) => {
     valueText = event.target.value;
-    tempShop = valueText;
+    // tempShop = valueText;
 } //updating text value function
 
 updateDate = (event) => {
@@ -46,20 +48,14 @@ btnAdd = (text, sum) => {
 } //adding by enter function
 
 addFunc = async () => {
-    if(inputText.value === '' || date.value === '' || inputSum.value === '') {
+    if(inputText.value === '' || date.value === '' || inputSum.value === 0) {
         alert('Enter your case !');
     } else {
         allCases.push(
             {text: valueText,
             date: valueDate,
             sum: valueSum});
-        // counter.push(valueSum)
-        // let i = 0;
 
-        // while(i < counter.length) {
-        //     console.log(counter);
-        //     i++
-        // }
         const resp = await fetch('http://localhost:7000/createTask', {
             method: 'POST',
             headers: {
@@ -73,24 +69,33 @@ addFunc = async () => {
             })
         });
         let result = await resp.json();
-        count = count + Number(valueSum);
-        totalSum.innerText = `Total: ${count} rub.`;
+        // count = count + Number(valueSum);
+        // totalSum.innerText = `Total: ${count} rub.`;
         valueText = '';
-        valueDate = ''
-        valueSum = '';
+        valueDate = '';
+        valueSum = null;
         inputText.value = '';
-        date.value = ''
-        inputSum.value = '';
+        date.value = '';
+        inputSum.value = 0;
         render();
     }
 } //checking input-length, adding cases function item.text
+
+// let arrTest = [1, 2, 3, 4];
+
+countFunc = (arr) => {
+    let count = _.reduce(allCases, (memo, item) => { return memo + +(item.sum); }, 0);
+
+    return +count;
+}
+
+console.log(countFunc(allCases));
 
 render = async () => {
     const content = document.getElementById('content_page');
     while(content.firstChild) {
         content.removeChild(content.firstChild);
     }
-    
     allCases.forEach((item, index) => {
         const container = document.createElement('div');
         container.className = 'task_container';
@@ -125,7 +130,7 @@ render = async () => {
                 allCases[indexEdit].text = text.value;
                 allCases[indexEdit].date = date.value;
                 allCases[indexEdit].sum = sum.value;
-                if(allCases[indexEdit].text === '' || allCases[indexEdit].date === '' || allCases[indexEdit].sum === '') {
+                if(allCases[indexEdit].text === '' || allCases[indexEdit].date === '' || allCases[indexEdit].sum === 0) {
                     alert('Incorrect value. Add value please...');
                 } else {
                     const resp = await fetch('http://localhost:7000/updateTask', {
@@ -137,7 +142,7 @@ render = async () => {
                     body: JSON.stringify(allCases[indexEdit])
                 });
                 let result = await resp.json();
-                totalSum.innerText = `Total: ${count} rub.`;
+                // totalSum.innerText = `Total: ${count} rub.`;
                 indexEdit = -1;
                 render();
             }
@@ -192,9 +197,13 @@ render = async () => {
                 indexEdit = index;
                 render();
             } //editing value in array
+        // countFunc(item.sum);
         }
         content.appendChild(container);
+        // console.log(countFunc(allCases));
     });
+    totalSum.innerText = `Total: ${countFunc()} rub.`;
+    // console.log(count);
 } //rendering array
 
 delFunc = async (item, index) => {
@@ -203,7 +212,5 @@ delFunc = async (item, index) => {
     });
     let result = await resp.json();
     allCases.splice(index, 1);
-    count = count - Number(item.sum);
-    totalSum.innerText = `Total: ${count} rub.`;
     render()
 } //deleting case function
