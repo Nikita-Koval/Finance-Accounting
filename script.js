@@ -1,6 +1,6 @@
 let allCases = [];
 let valueText = '';
-let valueSum = null;
+let valueSum = '';
 let indexEdit = -1;
 let count = 0;
 
@@ -11,9 +11,9 @@ window.onload = async function init() {
     inputSum.addEventListener('change', updateValueSum);
     totalSum = document.getElementById('totalSum');
     totalSum.addEventListener('DOMContentLoaded', countFunc);
-
     date = document.getElementById('newDate');
     date.addEventListener('change', updateDate);
+
     const resp = await fetch('http://localhost:7000/allTasks', {
         method: 'GET'
     });
@@ -23,17 +23,15 @@ window.onload = async function init() {
     render()
 } //loading by open page
 
-updateValue = (event) => {
+updateValue = async (event) => {
     valueText = event.target.value;
-    // tempShop = valueText;
 } //updating text value function
 
-updateDate = (event) => {
+updateDate = async (event) => {
     valueDate = event.target.value;
-    // console.log(valueDate)
 } //updating date function
 
-updateValueSum = (event) => {
+updateValueSum = async (event) => {
     valueSum = event.target.value;
 } //updating sum value function
 
@@ -48,13 +46,13 @@ btnAdd = (text, sum) => {
 } //adding by enter function
 
 addFunc = async () => {
-    if(inputText.value === '' || date.value === '' || inputSum.value === 0) {
+    if(inputText.value === '' || date.value === '' || inputSum.value === '') {
         alert('Enter your case !');
     } else {
         allCases.push(
-            {text: valueText,
+            { text: valueText,
             date: valueDate,
-            sum: valueSum});
+            sum: valueSum });
 
         const resp = await fetch('http://localhost:7000/createTask', {
             method: 'POST',
@@ -65,23 +63,19 @@ addFunc = async () => {
             body: JSON.stringify( {
                 text: valueText,
                 date: valueDate,
-                sum: valueSum
-            })
+                sum: valueSum })
         });
         let result = await resp.json();
-        // count = count + Number(valueSum);
-        // totalSum.innerText = `Total: ${count} rub.`;
+
         valueText = '';
         valueDate = '';
-        valueSum = null;
+        valueSum = '';
         inputText.value = '';
         date.value = '';
-        inputSum.value = 0;
+        inputSum.value = '';
         render();
     }
 } //checking input-length, adding cases function item.text
-
-// let arrTest = [1, 2, 3, 4];
 
 countFunc = (arr) => {
     let count = _.reduce(allCases, (memo, item) => { return memo + +(item.sum); }, 0);
@@ -89,14 +83,12 @@ countFunc = (arr) => {
     return +count;
 }
 
-console.log(countFunc(allCases));
-
 render = async () => {
     const content = document.getElementById('content_page');
     while(content.firstChild) {
         content.removeChild(content.firstChild);
     }
-    allCases.forEach((item, index) => {
+    allCases.map((item, index) => {
         const container = document.createElement('div');
         container.className = 'task_container';
 
@@ -126,11 +118,14 @@ render = async () => {
             const imgEdit = document.createElement('img');
             imgEdit.src = 'img/accept.ico';
             imgEdit.className = 'editPng';
+
             editingFunc = async () => {
-                allCases[indexEdit].text = text.value;
-                allCases[indexEdit].date = date.value;
-                allCases[indexEdit].sum = sum.value;
-                if(allCases[indexEdit].text === '' || allCases[indexEdit].date === '' || allCases[indexEdit].sum === 0) {
+                const allCasesDest ={ 
+                  text: allCases[indexEdit].text = text.value,
+                  date: allCases[indexEdit].date = date.value,
+                  sum: allCases[indexEdit].sum = sum.value };
+
+                if(allCasesDest.text === '' || allCasesDest.date === '' || allCasesDest.sum === '') {
                     alert('Incorrect value. Add value please...');
                 } else {
                     const resp = await fetch('http://localhost:7000/updateTask', {
@@ -142,10 +137,9 @@ render = async () => {
                     body: JSON.stringify(allCases[indexEdit])
                 });
                 let result = await resp.json();
-                // totalSum.innerText = `Total: ${count} rub.`;
                 indexEdit = -1;
                 render();
-            }
+              }
             } //saving edit function
 
             imgContEdit.appendChild(imgEdit);
@@ -163,16 +157,77 @@ render = async () => {
             const text = document.createElement('p');
             text.className = 'textBlock';
             text.innerText = `${index + 1}) Shop: ${item.text}`;
+
+            text.ondblclick = async () => {
+              text.setAttribute('contentEditable', 'true');
+              text.innerText = item.text;
+              text.focus();
+              };
+            text.onblur = async () => {
+                    const resp = await fetch('http://localhost:7000/updateTask', {
+                      method: 'PATCH',
+                      headers: {
+                          'Content-Type': 'application/json;charset=utf-8',
+                          'Access-Control-Allow-Origin': '*'},
+                      body: JSON.stringify({_id: item._id, text: text.innerText})
+                    });
+                    const resp1 = await fetch('http://localhost:7000/allTasks', {
+                      method: 'GET' });
+                    let result = await resp1.json();
+                    allCases = result;
+                    render();
+                }; //editing price dbclick
             container.appendChild(text); //creating shop text
 
             const dateText = document.createElement('p');
             dateText.className = 'dateDiv';
             dateText.innerText = `Date: ${item.date}`;
-            container.appendChild(dateText); //creating date text
 
+            dateText.ondblclick = () => {
+              dateText.setAttribute('contentEditable', 'true');
+              dateText.innerText = item.date;
+              dateText.focus();
+              };
+              dateText.onblur = async () => {
+                const resp = await fetch('http://localhost:7000/updateTask', {
+                  method: 'PATCH',
+                  headers: {
+                    'Content-Type': 'application/json;charset=utf-8',
+                    'Access-Control-Allow-Origin': '*'},
+                  body: JSON.stringify({_id: item._id, date: dateText.innerText})
+              });
+              const resp1 = await fetch('http://localhost:7000/allTasks', {
+                method: 'GET' });
+              let result = await resp1.json();
+              allCases = result;
+              render();
+                  }
+            container.appendChild(dateText); //creating date text
+          
             const sum = document.createElement('p');
             sum.className = 'textBlockSum'
             sum.innerText = `Sum: ${item.sum} rub.`;
+            sum.ondblclick = () => {
+              sum.setAttribute('contentEditable', 'true');
+              sum.innerText = item.sum;
+              sum.focus();
+              };
+              sum.onblur = async () => {
+                  if (Number(sum.innerText)) {
+                      const resp = await fetch('http://localhost:7000/updateTask', {
+                          method: 'PATCH',
+                          headers: {
+                            'Content-Type': 'application/json;charset=utf-8',
+                            'Access-Control-Allow-Origin': '*'},
+                          body: JSON.stringify({_id: item._id, sum: sum.innerText})
+                      });
+                      const resp1 = await fetch('http://localhost:7000/allTasks', {
+                        method: 'GET' });
+                      let result = await resp1.json();
+                      allCases = result;
+                      render() //editing price dbclick
+                    }
+                  }
             container.appendChild(sum); //creating sum text
 
             const imgCont = document.createElement('div');
@@ -197,13 +252,10 @@ render = async () => {
                 indexEdit = index;
                 render();
             } //editing value in array
-        // countFunc(item.sum);
         }
         content.appendChild(container);
-        // console.log(countFunc(allCases));
     });
     totalSum.innerText = `Total: ${countFunc()} rub.`;
-    // console.log(count);
 } //rendering array
 
 delFunc = async (item, index) => {
