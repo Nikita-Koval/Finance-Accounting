@@ -86,7 +86,7 @@ countFunc = (arr) => {
 render = async () => {
   const content = document.getElementById('content_page');
   while(content.firstChild) {
-      content.removeChild(content.firstChild);
+    content.removeChild(content.firstChild);
   }
   allCases.map((item, index) => {
     const container = document.createElement('div');
